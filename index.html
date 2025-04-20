@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Caixinha Super Tigrinho</title>
+    <style>
+        body {
+            font-family: 'Arial Black', Gadget, sans-serif;
+            background: linear-gradient(145deg, #0d0221, #ff9900);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-size: cover;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.85);
+            border: 5px double gold;
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 0 0 30px gold;
+            max-width: 500px;
+            width: 90%;
+            color: white;
+        }
+        h1 {
+            font-size: 26px;
+            text-align: center;
+            color: gold;
+            text-shadow: 2px 2px 5px #ff6600;
+            margin-bottom: 25px;
+        }
+        label {
+            font-weight: bold;
+            color: #ffd700;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0 20px 0;
+            border: 2px solid #ffcc00;
+            border-radius: 12px;
+            background-color: #1e1e1e;
+            color: #fff;
+        }
+        button {
+            background: linear-gradient(45deg, #ffcc00, #ff6600);
+            color: #000;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .resultado {
+            margin-top: 20px;
+            background-color: #222;
+            padding: 18px;
+            border-left: 5px solid gold;
+            border-radius: 8px;
+            color: #fff;
+        }
+        .tigrinho {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .tigrinho img {
+            width: 80px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="tigrinho">
+        <img src="https://i1.sndcdn.com/artworks-xdidFtkvJV12AJqL-YN755A-t500x500.png" alt="Tigrinho Cassino">
+    </div>
+    <h1>Simulador Super Tigrinho</h1>
+    <label for="valor">Valor Investido (R$):</label>
+    <input type="number" id="valor" step="0.01">
+
+    <label for="dias">Número de Dias:</label>
+    <input type="number" id="dias">
+
+    <button onclick="calcular()">Roleta</button>
+
+    <div class="resultado" id="resultado"></div>
+
+    <div id="roletaVisual" style="font-size: 60px; text-align: center; margin: 20px;">🎰</div>
+
+</div>
+
+<script>
+    function calcular() {
+        const valor = parseFloat(document.getElementById('valor').value);
+        const dias = parseInt(document.getElementById('dias').value);
+    
+        if (isNaN(valor) || isNaN(dias) || valor <= 0 || dias <= 0) {
+            document.getElementById('resultado').innerHTML = "Preencha os campos corretamente!";
+            return;
+        }
+    
+        const simbolos = ['🍒', '💎', '🔔', '🍀', '7️⃣', '🍉', '⭐', '👑'];
+        const roleta = document.getElementById('roletaVisual');
+        let pos = 0;
+        let voltas = 30;
+    
+        document.getElementById('resultado').innerHTML = "Girando roleta... 🎲";
+    
+        const animacao = setInterval(() => {
+            roleta.textContent = simbolos[pos % simbolos.length];
+            pos++;
+            voltas--;
+    
+            if (voltas <= 0) {
+                clearInterval(animacao);
+                roleta.textContent = simbolos[pos % simbolos.length];
+    
+                const taxaAnual = 14.15 / 100;
+                const taxaDiaria = Math.pow((1 + taxaAnual), 1 / 365) - 1;
+                const rendimentoBruto = valor * (Math.pow(1 + taxaDiaria, dias) - 1);
+    
+                const tabelaIOF = {
+                    1: 0.96, 2: 0.93, 3: 0.90, 4: 0.86, 5: 0.83, 6: 0.80, 7: 0.76, 8: 0.73, 9: 0.70, 10: 0.66,
+                    11: 0.63, 12: 0.60, 13: 0.56, 14: 0.53, 15: 0.50, 16: 0.46, 17: 0.43, 18: 0.40, 19: 0.36, 20: 0.33,
+                    21: 0.30, 22: 0.26, 23: 0.23, 24: 0.20, 25: 0.16, 26: 0.13, 27: 0.10, 28: 0.06, 29: 0.03, 30: 0.00
+                };
+    
+                let aliquotaIOF = 0;
+                if (dias <= 30) {
+                    aliquotaIOF = tabelaIOF[dias] || 0;
+                }
+                const valorIOF = rendimentoBruto * aliquotaIOF;
+    
+                let aliquotaIR = 0.15;
+                if (dias <= 180) {
+                    aliquotaIR = 0.225;
+                } else if (dias <= 360) {
+                    aliquotaIR = 0.20;
+                } else if (dias <= 720) {
+                    aliquotaIR = 0.175;
+                }
+    
+                const valorIR = (rendimentoBruto - valorIOF) * aliquotaIR;
+                const valorLiquido = valor + rendimentoBruto - valorIOF - valorIR;
+    
+                document.getElementById('resultado').innerHTML = `
+                    <strong>Resultado da Simulação:</strong><br>
+                    Valor Investido: R$ ${valor.toFixed(2)}<br>
+                    Rendimento Bruto: R$ ${rendimentoBruto.toFixed(2)}<br>
+                    Desconto IOF: R$ ${valorIOF.toFixed(2)}<br>
+                    Desconto IR: R$ ${valorIR.toFixed(2)}<br>
+                    <strong>Valor Líquido Final: R$ ${valorLiquido.toFixed(2)}</strong>
+                `;
+            }
+        }, 80); 
+    }
+    </script>
+    
+</body>
+</html>
